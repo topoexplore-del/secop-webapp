@@ -20,7 +20,7 @@ st.markdown("""
         padding: 0;
     }
     .login-box {
-        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -40,7 +40,7 @@ st.markdown("""
         margin-bottom: 1px;
         line-height: 1.2;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        text-align: center;  /* Reforzado centrado */
+        text-align: center;
     }
     .login-subtitle {
         font-size: 2.8rem;
@@ -58,8 +58,22 @@ st.markdown("""
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
         text-align: center;
     }
+    /* Centrar y acortar la barra de contraseña */
+    .password-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 400px;
+        margin: 30px auto 20px auto;
+    }
+    .password-label {
+        font-size: 1.4rem;
+        color: #ffffff;
+        margin-bottom: 10px;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    }
     .stTextInput > div > div > input {
-        font-size: 1.8rem;
+        font-size: 1.4rem;
         padding: 14px;
         border-radius: 10px;
         border: 2px solid rgba(255,255,255,0.4);
@@ -67,23 +81,20 @@ st.markdown("""
         color: white;
         text-align: center;
         width: 100%;
-        max-width: 700px;
-        margin: 0 auto;
-        display: block;
+        max-width: 400px;
     }
+    /* Botón Ingresar centrado y proporcional */
     .stButton > button {
         background: #0d47a1;
         color: white;
-        font-size: 1.2rem;
-        padding: 14px 40px;
+        font-size: 1.4rem;
+        padding: 14px 60px;
         border-radius: 10px;
         border: none;
-        margin-top: 20px;
         width: 100%;
         max-width: 400px;
         display: block;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 0 auto;
         transition: all 0.3s;
     }
     .stButton > button:hover {
@@ -101,10 +112,10 @@ if 'authenticated' not in st.session_state:
 if not st.session_state.authenticated:
     # Contenedor centrado con diseño corporativo
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
-   
+  
     st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
     st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
-   
+  
     st.markdown("""
         <p class="author">
             ELABORADO POR EL INGENIERO<br>
@@ -112,17 +123,22 @@ if not st.session_state.authenticated:
         </p>
     """, unsafe_allow_html=True)
 
-    password = st.text_input("Contraseña:", type="password", key="login_pass")
-   
+    # Contenedor para centrar contraseña + botón
+    st.markdown('<div class="password-container">', unsafe_allow_html=True)
+    st.markdown('<div class="password-label">Contraseña:</div>', unsafe_allow_html=True)
+    password = st.text_input("", type="password", key="login_pass", label_visibility="collapsed")
+    
     if st.button("Ingresar"):
         if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
             st.session_state.authenticated = True
             st.rerun()
         else:
             st.error("Contraseña incorrecta")
-   
+    
     st.markdown('</div>', unsafe_allow_html=True)
-   
+  
+    st.markdown('</div>', unsafe_allow_html=True)
+  
     # Ocultar todo lo demás hasta autenticar
     st.stop()
 
@@ -179,11 +195,6 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
-
-
-
-
-
 
 
 
