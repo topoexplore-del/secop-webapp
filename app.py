@@ -19,21 +19,24 @@ st.markdown("""
         margin: 0;
         padding: 0;
     }
+    /* Contenedor principal que ocupa toda la pantalla y centra todo vertical y horizontalmente */
+    .main-login {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 0 20px;
+    }
     .login-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         background: transparent;
         padding: 40px 60px;
         border-radius: 16px;
         box-shadow: none;
-        text-align: center;
         max-width: 800px;
         width: 90%;
-        margin: 0 auto;
     }
-    /* Clase común para título y subtítulo (mismo estilo) */
     .main-title, .subtitle-title {
         font-size: 2.8rem;
         font-weight: 700;
@@ -94,7 +97,10 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Contenedor centrado con diseño corporativo
+    # Contenedor principal que centra todo en la página
+    st.markdown('<div class="main-login">', unsafe_allow_html=True)
+    
+    # Cuadro de login (transparente y centrado)
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
    
     st.markdown('<div class="main-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
@@ -117,7 +123,9 @@ if not st.session_state.authenticated:
             st.error("Contraseña incorrecta")
    
     st.markdown('</div>', unsafe_allow_html=True)
-   
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     # Ocultar todo lo demás hasta autenticar
     st.stop()
 
