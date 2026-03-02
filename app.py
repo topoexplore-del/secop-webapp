@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import urllib.parse
-import plotly.express as px
-import json
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -38,7 +36,7 @@ st.markdown("""
         font-weight: 700;
         color: #ffffff;
         margin-bottom: 1px;
-        line-height: 1.2;
+        line-height: 0.5;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         text-align: center;
     }
@@ -124,97 +122,57 @@ if not st.session_state.authenticated:
 st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
-# ==================== CARGAR DATOS DESDE API (SIN LÍMITE DE FILAS) ====================
-@st.cache_data(ttl=3600)  # Cache por 1 hora
+# ==================== CARGAR DATOS DESDE API ====================
+@st.cache_data(ttl=3600)
 def cargar_datos():
     try:
-        # URL base de la API
+        # URL base
         base_url = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
         
-        # Consulta completa (la que me compartiste)
+        # Consulta REDUCIDA solo con columnas útiles (evita error 400)
         query = """
-        SELECT
-          `entidad`,
-          `nit_entidad`,
-          `departamento_entidad`,
-          `ciudad_entidad`,
-          `ordenentidad`,
-          `codigo_pci`,
-          `id_del_proceso`,
-          `referencia_del_proceso`,
-          `ppi`,
-          `id_del_portafolio`,
-          `nombre_del_procedimiento`,
-          `descripci_n_del_procedimiento`,
-          `fase`,
-          `fecha_de_publicacion_del`,
-          `fecha_de_ultima_publicaci`,
-          `fecha_de_publicacion_fase`,
-          `fecha_de_publicacion_fase_1`,
-          `fecha_de_publicacion`,
-          `fecha_de_publicacion_fase_2`,
-          `fecha_de_publicacion_fase_3`,
-          `precio_base`,
-          `modalidad_de_contratacion`,
-          `justificaci_n_modalidad_de`,
-          `duracion`,
-          `unidad_de_duracion`,
-          `fecha_de_recepcion_de`,
-          `fecha_de_apertura_de_respuesta`,
-          `fecha_de_apertura_efectiva`,
-          `ciudad_de_la_unidad_de`,
-          `nombre_de_la_unidad_de`,
-          `proveedores_invitados`,
-          `proveedores_con_invitacion`,
-          `visualizaciones_del`,
-          `proveedores_que_manifestaron`,
-          `respuestas_al_procedimiento`,
-          `respuestas_externas`,
-          `conteo_de_respuestas_a_ofertas`,
-          `proveedores_unicos_con`,
-          `numero_de_lotes`,
-          `estado_del_procedimiento`,
-          `id_estado_del_procedimiento`,
-          `adjudicado`,
-          `id_adjudicacion`,
-          `codigoproveedor`,
-          `departamento_proveedor`,
-          `ciudad_proveedor`,
-          `fecha_adjudicacion`,
-          `valor_total_adjudicacion`,
-          `nombre_del_adjudicador`,
-          `nombre_del_proveedor`,
-          `nit_del_proveedor_adjudicado`,
-          `codigo_principal_de_categoria`,
-          `estado_de_apertura_del_proceso`,
-          `tipo_de_contrato`,
-          `subtipo_de_contrato`,
-          `categorias_adicionales`,
-          `urlproceso`,
-          `codigo_entidad`,
-          `estado_resumen`
+        SELECT 
+          entidad,
+          nit_entidad,
+          departamento_entidad,
+          ciudad_entidad,
+          id_del_proceso,
+          referencia_del_proceso,
+          nombre_del_procedimiento,
+          descripci_n_del_procedimiento,
+          fase,
+          fecha_de_publicacion_del,
+          precio_base,
+          modalidad_de_contratacion,
+          estado_del_procedimiento,
+          valor_total_adjudicacion,
+          urlproceso,
+          estado_resumen
         """
         
-        # URL final con $limit muy alto para traer TODO el dataset
+        # URL final con límite muy alto
         url = f"{base_url}?$query={urllib.parse.quote(query)}&$limit=999999999"
         
-        # Cargar datos
+        # Mostrar la URL generada para depuración (puedes comentarla después)
+        st.info(f"Intentando cargar desde: {url[:150]}... (consulta completa generada)")
+        
         df = pd.read_json(url)
         
-        # Limpieza básica
+        # Limpieza
         df = df.rename(columns=lambda x: x.strip())
         
-        # Convertir fechas y valores numéricos
+        # Convertir tipos
         if 'fecha_de_publicacion_del' in df.columns:
             df['fecha_de_publicacion_del'] = pd.to_datetime(df['fecha_de_publicacion_del'], errors='coerce')
         if 'valor_total_adjudicacion' in df.columns:
             df['valor_total_adjudicacion'] = pd.to_numeric(df['valor_total_adjudicacion'], errors='coerce').fillna(0)
         
-        st.success(f"Datos cargados desde API: {len(df)} filas encontradas.")
+        st.success(f"Datos cargados: {len(df)} filas")
         return df
     
     except Exception as e:
         st.error(f"Error al cargar datos desde la API: {str(e)}")
+        st.info("Posibles causas: consulta demasiado larga, límite de tasa de la API o problema temporal en datos.gov.co.")
         return pd.DataFrame()
 
 df = cargar_datos()
