@@ -20,18 +20,18 @@ st.markdown("""
         padding: 0;
     }
     .login-box {
-        position: absolute;
+        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         background: transparent;
-        padding: 50px 60px;
+        padding: 40px 60px;
         border-radius: 16px;
         box-shadow: none;
         text-align: center;
         max-width: 800px;
         width: 90%;
-        margin: 0 auto;  /* Refuerza centrado horizontal */
+        margin: 0 auto;
     }
     .login-title {
         font-size: 2.8rem;
@@ -40,6 +40,7 @@ st.markdown("""
         margin-bottom: 15px;
         line-height: 1.2;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;  /* Reforzado centrado */
     }
     .login-subtitle {
         font-size: 1.3rem;
@@ -47,6 +48,7 @@ st.markdown("""
         margin-bottom: 40px;
         font-weight: 500;
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        text-align: center;
     }
     .author {
         font-size: 1.4rem;
@@ -54,6 +56,7 @@ st.markdown("""
         margin: 30px 0;
         font-weight: 500;
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        text-align: center;
     }
     .stTextInput > div > div > input {
         font-size: 1.2rem;
@@ -63,6 +66,10 @@ st.markdown("""
         background: rgba(255,255,255,0.15);
         color: white;
         text-align: center;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        display: block;
     }
     .stButton > button {
         background: #0d47a1;
@@ -73,6 +80,10 @@ st.markdown("""
         border: none;
         margin-top: 20px;
         width: 100%;
+        max-width: 400px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
         transition: all 0.3s;
     }
     .stButton > button:hover {
