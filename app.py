@@ -20,35 +20,29 @@ st.markdown("""
         padding: 0;
     }
     .login-box {
-        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
+        position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         background: transparent;
-        padding: 40px 60px;
+        padding: 50px 60px;
         border-radius: 16px;
         box-shadow: none;
         text-align: center;
         max-width: 800px;
         width: 90%;
-        margin: 0 auto;
     }
-    .login-title {
+    .main-title, .subtitle-title {
         font-size: 2.8rem;
         font-weight: 700;
         color: #ffffff;
-        margin-bottom: 15px;
+        margin: 0;
         line-height: 1.2;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        text-align: center;  /* Reforzado centrado */
     }
-    .login-subtitle {
-        font-size: 1.3rem;
-        color: #e0e0e0;
+    .subtitle-title {
+        margin-top: 10px;
         margin-bottom: 40px;
-        font-weight: 500;
-        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
-        text-align: center;
     }
     .author {
         font-size: 1.4rem;
@@ -56,7 +50,6 @@ st.markdown("""
         margin: 30px 0;
         font-weight: 500;
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
-        text-align: center;
     }
     .stTextInput > div > div > input {
         font-size: 1.2rem;
@@ -102,8 +95,8 @@ if not st.session_state.authenticated:
     # Contenedor centrado con diseño corporativo
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
    
-    st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle-title">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
    
     st.markdown("""
         <p class="author">
