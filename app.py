@@ -144,7 +144,6 @@ def cargar_datos():
     # 1. LEER CREDENCIALES DESDE STREAMLIT SECRETS (TOML)
     if "GOOGLE_DRIVE" not in st.secrets:
         st.error("Secrets de Google Drive no configurados en TOML.")
-        st.write(st.secrets.to_dict())
         return pd.DataFrame()
         
     creds_dict = dict(st.secrets["GOOGLE_DRIVE"])
@@ -246,5 +245,6 @@ if not df.empty:
     st.success("✅ Dashboard cargado correctamente.")
 else:
     st.info("Esperando datos...")
+
 
 
