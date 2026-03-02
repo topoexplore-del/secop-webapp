@@ -83,7 +83,7 @@ st.markdown("""
         max-width: 400px;
         display: block;
         margin-bottom: auto;
-        margin-right: auto;
+        margin-bottom: auto;
         transition: all 0.3s;
     }
     .stButton > button:hover {
@@ -179,6 +179,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
