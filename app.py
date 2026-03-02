@@ -149,11 +149,11 @@ def cargar_datos():
     creds_dict = dict(st.secrets["GOOGLE_DRIVE"])
     SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
     
-    # Crear credenciales desde el diccionario de secretos
+    # Usar from_service_account_info en lugar de from_service_account_file
     creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     service = build('drive', 'v3', credentials=creds)
 
-    # 2. ID de la carpeta
+   # 2. ID de la carpeta
     FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv'
 
     # 3. Buscar el archivo más reciente en la carpeta
@@ -245,3 +245,4 @@ if not df.empty:
     st.success("✅ Dashboard cargado correctamente.")
 else:
     st.info("Esperando datos...")
+
