@@ -78,7 +78,7 @@ st.markdown("""
         padding: 14px 40px;
         border-radius: 10px;
         border: none;
-        margin-top: 20px;
+        margin-bottom: 20px;
         width: 100%;
         max-width: 400px;
         display: block;
@@ -179,6 +179,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
