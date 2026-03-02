@@ -11,7 +11,7 @@ st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", 
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.0), rgba(0,0,0,0.0)),
+        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
                     url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')
                     center/cover no-repeat fixed;
         color: white;
@@ -164,6 +164,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
