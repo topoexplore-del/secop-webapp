@@ -43,11 +43,11 @@ st.markdown("""
         text-align: center;  /* Reforzado centrado */
     }
     .login-subtitle {
-        font-size: 1.3rem;
-        color: #e0e0e0;
-        margin-bottom: 40px;
-        font-weight: 500;
-        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        font-size: 2.8rem;
+        color: #ffffff;
+        margin-bottom: 15px;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         text-align: center;
     }
     .author {
@@ -179,3 +179,4 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
