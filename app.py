@@ -20,25 +20,19 @@ st.markdown("""
         padding: 0;
     }
     .login-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: auto;
-        padding: 50px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 24px;
-        
-        /* ELIMINAR REFLEJOS Y BORDES */
-        border: none !important;
-        box-shadow: none !important;
-        
+        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 40px 60px;
+        border-radius: 16px;
+        box-shadow: none;
         text-align: center;
-        max-width: 650px;
-        margin-top: 10vh;
+        max-width: 800px;
+        width: 90%;
+        margin: 0 auto;
     }
-
     .login-title { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
     .login-subtitle { font-size: 1.1rem; color: #3b82f6; font-weight: 600; text-transform: uppercase; margin-bottom: 20px; }
     .author { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 30px; line-height: 1.5; }
@@ -167,6 +161,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
