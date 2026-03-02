@@ -4,98 +4,104 @@ import urllib.request
 import plotly.express as px
 import json
 
-# Configuración de página (ancho completo, título)
-st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide")
+# Configuración de página (ancho completo)
+st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
 
-# Fondo profesional (oscuro suave con imagen corporativa de fondo)
+# Fondo profesional con imagen corporativa (la misma que te gustó)
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
-        color: white;
+        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
+                    url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') 
+                    center/cover no-repeat fixed;
         min-height: 100vh;
+        color: white;
     }
-    .stSidebar {
-        background-color: rgba(30, 30, 46, 0.9);
-        backdrop-filter: blur(10px);
-    }
-    .login-container {
-        max-width: 600px;
-        margin: 15% auto 0 auto;
-        padding: 40px;
+    .login-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: rgba(255, 255, 255, 0.95);
+        padding: 50px 60px;
         border-radius: 16px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         text-align: center;
-        color: #1a1a1a;
+        max-width: 700px;
+        width: 90%;
     }
     .login-title {
-        font-size: 2.2rem;
+        font-size: 2.8rem;
         font-weight: 700;
         color: #0d47a1;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        line-height: 1.2;
     }
     .login-subtitle {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         color: #424242;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
+        font-weight: 500;
     }
     .stTextInput > div > div > input {
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
-        padding: 12px;
+        font-size: 1.2rem;
+        padding: 14px;
+        border-radius: 10px;
+        border: 2px solid #d1d5db;
     }
     .stButton > button {
         background: #0d47a1;
         color: white;
-        border-radius: 8px;
-        padding: 12px 32px;
-        font-weight: bold;
+        font-size: 1.2rem;
+        padding: 14px 40px;
+        border-radius: 10px;
         border: none;
+        margin-top: 20px;
+        width: 100%;
         transition: all 0.3s;
     }
     .stButton > button:hover {
         background: #1565c0;
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(13,71,161,0.3);
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ==================== PÁGINA DE BIENVENIDA / LOGIN ====================
+# ==================== PÁGINA DE INICIO / LOGIN ====================
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Contenedor centrado con diseño profesional
-    with st.container():
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        
-        st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
-        
-        st.markdown("""
-            <p style="font-size:1.1rem; color:#424242; margin:20px 0;">
-                ELABORADO POR EL INGENIERO<br>
-                <strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong>
-            </p>
-        """, unsafe_allow_html=True)
-
-        password = st.text_input("Contraseña:", type="password", key="login_password")
-        
-        if st.button("Ingresar", use_container_width=True):
-            if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Contraseña incorrecta")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Contenedor centrado con diseño corporativo
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
     
-    # Ocultar el resto de la página hasta autenticar
+    st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
+    
+    st.markdown("""
+        <p style="font-size:1.4rem; color:#424242; margin:30px 0; font-weight:500;">
+            ELABORADO POR EL INGENIERO<br>
+            <strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong>
+        </p>
+    """, unsafe_allow_html=True)
+
+    password = st.text_input("Contraseña:", type="password", key="login_pass")
+    
+    if st.button("Ingresar"):
+        if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Contraseña incorrecta")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Ocultar todo lo demás hasta autenticar
     st.stop()
 
-# ==================== CONTENIDO PRINCIPAL (solo si autenticado) ====================
-st.title("🔍 SECOP PRO - Dashboard de Licitaciones en Colombia")
+# ==================== DASHBOARD PRINCIPAL (solo si autenticado) ====================
+st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
 # Cargar datos
@@ -112,7 +118,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-# Filtros en sidebar
+# Filtros
 with st.sidebar:
     st.header("Filtros")
     depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
@@ -120,7 +126,6 @@ with st.sidebar:
     palabras = st.text_input("Palabras clave (APU, Análisis, etc.)")
     fecha_desde = st.date_input("Fecha desde", value=pd.to_datetime("2025-01-01"))
 
-# Aplicar filtros
 filtered = df.copy()
 if depto:
     filtered = filtered[filtered['Departamento Entidad'].isin(depto)]
@@ -134,7 +139,6 @@ if fecha_desde:
 
 st.subheader(f"Resultados encontrados: {len(filtered)} procesos")
 
-# Tabla principal
 st.dataframe(
     filtered[[
         'ID del Proceso', 'Entidad', 'Departamento Entidad', 'Ciudad Entidad',
@@ -145,8 +149,8 @@ st.dataframe(
     hide_index=True
 )
 
-# Descarga
 csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
-st.success("✅ Sistema funcionando correctamente.")
+st.success("✅ Dashboard cargado correctamente.")
+
