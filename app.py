@@ -32,11 +32,32 @@ st.markdown("""
         max-width: 800px;
         width: 90%;
         margin: 0 auto;
+      }
+    .login-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1px;
+        line-height: 1.2;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;  /* Reforzado centrado */
     }
-    .login-title { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
-    .login-subtitle { font-size: 1.1rem; color: #3b82f6; font-weight: 600; text-transform: uppercase; margin-bottom: 20px; }
-    .author { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 30px; line-height: 1.5; }
-
+    .login-subtitle {
+        font-size: 2.8rem;
+        color: #ffffff;
+        margin-bottom: 15px;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;
+    }
+    .author {
+        font-size: 1.8rem;
+        color: #bbdefb;
+        margin: 30px 0;
+        font-weight: 700;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        text-align: center;
+    }
     /* Forzar centrado de la etiqueta y el input */
     .stTextInput label {
         display: block !important;
@@ -161,6 +182,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
