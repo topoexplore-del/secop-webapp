@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
-import urllib.parse
+import urllib.request
+import plotly.express as px
+import json
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -43,7 +45,7 @@ st.markdown("""
     .login-subtitle {
         font-size: 2.8rem;
         color: #ffffff;
-        margin-bottom: 15px;
+        margin-bottom: 0px;
         font-weight: 700;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         text-align: center;
@@ -123,43 +125,29 @@ st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
 # ==================== CARGAR DATOS DESDE API ====================
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600)  # Cache por 1 hora
 def cargar_datos():
     try:
-        base_url = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
+        # URL de la API que compartiste (consulta completa de datos.gov.co)
+        url = "https://www.datos.gov.co/resource/p6dx-8zbt.json?$query=SELECT%20%60entidad%60%2C%20%60nit_entidad%60%2C%20%60departamento_entidad%60%2C%20%60ciudad_entidad%60%2C%20%60ordenentidad%60%2C%20%60codigo_pci%60%2C%20%60id_del_proceso%60%2C%20%60referencia_del_proceso%60%2C%20%60ppi%60%2C%20%60id_del_portafolio%60%2C%20%60nombre_del_procedimiento%60%2C%20%60descripci_n_del_procedimiento%60%2C%20%60fase%60%2C%20%60fecha_de_publicacion_del%60%2C%20%60fecha_de_ultima_publicaci%60%2C%20%60fecha_de_publicacion_fase%60%2C%20%60fecha_de_publicacion_fase_1%60%2C%20%60fecha_de_publicacion%60%2C%20%60fecha_de_publicacion_fase_2%60%2C%20%60fecha_de_publicacion_fase_3%60%2C%20%60precio_base%60%2C%20%60modalidad_de_contratacion%60%2C%20%60justificaci_n_modalidad_de%60%2C%20%60duracion%60%2C%20%60unidad_de_duracion%60%2C%20%60fecha_de_recepcion_de%60%2C%20%60fecha_de_apertura_de_respuesta%60%2C%20%60fecha_de_apertura_efectiva%60%2C%20%60ciudad_de_la_unidad_de%60%2C%20%60nombre_de_la_unidad_de%60%2C%20%60proveedores_invitados%60%2C%20%60proveedores_con_invitacion%60%2C%20%60visualizaciones_del%60%2C%20%60proveedores_que_manifestaron%60%2C%20%60respuestas_al_procedimiento%60%2C%20%60respuestas_externas%60%2C%20%60conteo_de_respuestas_a_ofertas%60%2C%20%60proveedores_unicos_con%60%2C%20%60numero_de_lotes%60%2C%20%60estado_del_procedimiento%60%2C%20%60id_estado_del_procedimiento%60%2C%20%60adjudicado%60%2C%20%60id_adjudicacion%60%2C%20%60codigoproveedor%60%2C%20%60departamento_proveedor%60%2C%20%60ciudad_proveedor%60%2C%20%60fecha_adjudicacion%60%2C%20%60valor_total_adjudicacion%60%2C%20%60nombre_del_adjudicador%60%2C%20%60nombre_del_proveedor%60%2C%20%60nit_del_proveedor_adjudicado%60%2C%20%60codigo_principal_de_categoria%60%2C%20%60estado_de_apertura_del_proceso%60%2C%20%60tipo_de_contrato%60%2C%20%60subtipo_de_contrato%60%2C%20%60categorias_adicionales%60%2C%20%60urlproceso%60%2C%20%60codigo_entidad%60%2C%20%60estado_resumen%60"
         
-        # Consulta limpia, en una sola línea, sin saltos ni espacios extras
-        query = "SELECT entidad, departamento_entidad, ciudad_entidad, id_del_proceso, nombre_del_procedimiento, descripci_n_del_procedimiento, fecha_de_publicacion_del, valor_total_adjudicacion, urlproceso, estado_del_procedimiento"
-        
-        # Generar URL
-        url = f"{base_url}?$query={urllib.parse.quote(query)}&$limit=999999999"
-        
-        # Depuración: mostrar la URL completa (para verificar)
-        st.info(f"URL de consulta generada: {url}")
-        
-        # Cargar datos
         df = pd.read_json(url)
-        
-        # Limpieza
         df = df.rename(columns=lambda x: x.strip())
         
-        # Convertir tipos
+        # Limpieza de columnas clave
         if 'fecha_de_publicacion_del' in df.columns:
             df['fecha_de_publicacion_del'] = pd.to_datetime(df['fecha_de_publicacion_del'], errors='coerce')
         if 'valor_total_adjudicacion' in df.columns:
             df['valor_total_adjudicacion'] = pd.to_numeric(df['valor_total_adjudicacion'], errors='coerce').fillna(0)
         
-        st.success(f"¡Éxito! Datos cargados: {len(df)} filas encontradas.")
         return df
-    
     except Exception as e:
-        st.error(f"Error al cargar datos desde la API: {str(e)}")
-        st.info("Posibles causas: consulta inválida o problema temporal en la API. Prueba refrescar la página.")
+        st.error(f"Error al cargar datos desde la API: {e}")
         return pd.DataFrame()
 
 df = cargar_datos()
 
-# ==================== FILTROS ====================
+# Filtros en la barra lateral
 with st.sidebar:
     st.header("Filtros")
     if not df.empty:
@@ -168,9 +156,9 @@ with st.sidebar:
         palabras = st.text_input("Palabras clave (APU, Análisis, etc.)")
         fecha_desde = st.date_input("Fecha desde", value=pd.to_datetime("2025-01-01"))
     else:
-        st.warning("No hay datos disponibles para filtrar.")
+        st.warning("No hay datos para filtrar.")
 
-# ==================== APLICAR FILTROS ====================
+# Aplicar filtros
 if not df.empty:
     filtered = df.copy()
     if depto:
