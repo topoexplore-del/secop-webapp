@@ -202,9 +202,6 @@ def cargar_datos():
 
 df = cargar_datos()
 
-# 👇 Prueba rápida para confirmar que los secrets están cargados
-st.write("Email del servicio:", st.secrets["GOOGLE_DRIVE"]["client_email"])
-
 # Filtros en la barra lateral
 with st.sidebar:
     st.header("Filtros")
@@ -248,6 +245,7 @@ if not df.empty:
     st.success("✅ Dashboard cargado correctamente.")
 else:
     st.info("Esperando datos...")
+
 
 
 
