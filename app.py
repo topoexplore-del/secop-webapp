@@ -71,21 +71,7 @@ st.markdown("""
         margin: 0 auto;
         display: block;
     }
-    .stButton > button {
-        background: #0d47a1;
-        color: white;
-        font-size: 1.2rem;
-        padding: 14px 40px;
-        border-radius: 10px;
-        border: none;
-        margin-bottom: 20px;
-        width: 100%;
-        max-width: 400px;
-        display: block;
-        margin-bottom: /* Reforzado centrado */
-        margin-bottom: /* Reforzado centrado */
-        transition: all 0.3s;
-    }
+.stButton > button { background: #0d47a1; color: white; font-size: 1.2rem; padding: 14px 40px; border-radius: 10px; border: none; margin-top: 20px; width: 60%; /* más compacto */ max-width: 250px; /* límite de ancho */ display: block; margin-left: auto; margin-right: auto; /* centrado */ transition: all 0.3s;
     .stButton > button:hover {
         background: #1565c0;
         transform: translateY(-3px);
@@ -179,6 +165,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
