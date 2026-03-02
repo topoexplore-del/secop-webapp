@@ -126,35 +126,16 @@ st.markdown("Sistema privado con organización automática por Departamento → 
 @st.cache_data(ttl=3600)
 def cargar_datos():
     try:
-        # URL base
         base_url = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
         
-        # Consulta REDUCIDA solo con columnas útiles (evita error 400)
-        query = """
-        SELECT 
-          entidad,
-          nit_entidad,
-          departamento_entidad,
-          ciudad_entidad,
-          id_del_proceso,
-          referencia_del_proceso,
-          nombre_del_procedimiento,
-          descripci_n_del_procedimiento,
-          fase,
-          fecha_de_publicacion_del,
-          precio_base,
-          modalidad_de_contratacion,
-          estado_del_procedimiento,
-          valor_total_adjudicacion,
-          urlproceso,
-          estado_resumen
-        """
+        # Consulta limpia y en una sola línea (solo columnas útiles)
+        query = "SELECT entidad, nit_entidad, departamento_entidad, ciudad_entidad, id_del_proceso, referencia_del_proceso, nombre_del_procedimiento, descripci_n_del_procedimiento, fase, fecha_de_publicacion_del, precio_base, modalidad_de_contratacion, estado_del_procedimiento, valor_total_adjudicacion, urlproceso, estado_resumen"
         
-        # URL final con límite muy alto
+        # URL final
         url = f"{base_url}?$query={urllib.parse.quote(query)}&$limit=999999999"
         
-        # Mostrar la URL generada para depuración (puedes comentarla después)
-        st.info(f"Intentando cargar desde: {url[:150]}... (consulta completa generada)")
+        # Depuración: mostrar URL (córtala para no saturar)
+        st.info(f"Intentando cargar desde API (URL abreviada): {url[:200]}...")
         
         df = pd.read_json(url)
         
@@ -167,12 +148,12 @@ def cargar_datos():
         if 'valor_total_adjudicacion' in df.columns:
             df['valor_total_adjudicacion'] = pd.to_numeric(df['valor_total_adjudicacion'], errors='coerce').fillna(0)
         
-        st.success(f"Datos cargados: {len(df)} filas")
+        st.success(f"¡Éxito! Datos cargados: {len(df)} filas encontradas.")
         return df
     
     except Exception as e:
         st.error(f"Error al cargar datos desde la API: {str(e)}")
-        st.info("Posibles causas: consulta demasiado larga, límite de tasa de la API o problema temporal en datos.gov.co.")
+        st.info("Posibles causas: consulta inválida, límite de tasa o problema en datos.gov.co. Prueba refrescar o reduce columnas.")
         return pd.DataFrame()
 
 df = cargar_datos()
