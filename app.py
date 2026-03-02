@@ -16,8 +16,6 @@ st.markdown("""
                     center/cover no-repeat fixed;
         color: white;
     }
-
-    /* Caja de login tipo 'tarjeta flotante' profesional */
     .login-box {
         display: flex;
         flex-direction: column;
@@ -166,3 +164,4 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
