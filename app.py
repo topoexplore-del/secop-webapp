@@ -16,62 +16,80 @@ st.markdown("""
                     center/cover no-repeat fixed;
         min-height: 100vh;
         color: white;
+        margin: 0;
+        padding: 0;
     }
     .login-box {
-        position: fixed;
+        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         background: transparent;
-        padding: 40px;
+        padding: 40px 60px;
+        border-radius: 16px;
+        box-shadow: none;
         text-align: center;
-        width: 100%;
         max-width: 800px;
+        width: 90%;
+        margin: 0 auto;
     }
-    
-    /* Centrar el label de "Contraseña" */
-    .stTextInput label {
-        display: block !important;
-        text-align: center !important;
-        color: white !important;
-        font-size: 1.2rem !important;
-        margin-bottom: 10px !important;
+    .login-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1px;
+        line-height: 1.2;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;  /* Reforzado centrado */
     }
-
+    .login-subtitle {
+        font-size: 2.8rem;
+        color: #ffffff;
+        margin-bottom: 15px;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;
+    }
+    .author {
+        font-size: 1.8rem;
+        color: #bbdefb;
+        margin: 30px 0;
+        font-weight: 700;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        text-align: center;
+    }
     .stTextInput > div > div > input {
-        font-size: 1.5rem;
-        padding: 10px;
+        font-size: 1.8rem;
+        padding: 14px;
         border-radius: 10px;
         border: 2px solid rgba(255,255,255,0.4);
         background: rgba(255,255,255,0.15);
         color: white;
         text-align: center;
         width: 100%;
-        max-width: 500px;
+        max-width: 700px;
         margin: 0 auto;
+        display: block;
     }
-
-    /* ESTA ES LA PARTE CLAVE PARA EL BOTÓN */
-    .stButton {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
     .stButton > button {
         background: #0d47a1;
         color: white;
         font-size: 1.2rem;
-        padding: 12px 60px; /* Aumenté el padding lateral para que se vea mejor */
+        padding: 14px 40px;
         border-radius: 10px;
         border: none;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 400px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
         transition: all 0.3s;
     }
-
     .stButton > button:hover {
         background: #1565c0;
-        transform: scale(1.05);
-        box-shadow: 0 10px 20px rgba(13,71,161,0.4);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(13,71,161,0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -161,16 +179,6 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
-
-
-
-
-
-
-
-
-
-
 
 
 
