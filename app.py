@@ -3,13 +3,13 @@ import pandas as pd
 import urllib.request
 import plotly.express as px
 import json
-# --- Nuevas librerías necesarias para la automatización ---
+# --- Librerías necesarias para la automatización ---
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import io
 import os
-# ---------------------------------------------------------
+# ----------------------------------------------------
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -141,18 +141,19 @@ st.markdown("Sistema privado con organización automática por Departamento → 
 
 @st.cache_data(ttl=3600)
 def cargar_datos():
-    # 1. Configurar credenciales desde el archivo JSON en GitHub
-    KEY_PATH = "credentials.json"
-    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-    
-    if not os.path.exists(KEY_PATH):
-        st.error("Archivo credentials.json no encontrado en el repositorio.")
+    # 1. LEER CREDENCIALES DESDE STREAMLIT SECRETS (TOML)
+    if "GOOGLE_DRIVE" not in st.secrets:
+        st.error("Secrets de Google Drive no configurados en TOML.")
         return pd.DataFrame()
         
-    creds = service_account.Credentials.from_service_account_file(KEY_PATH, scopes=SCOPES)
+    creds_dict = dict(st.secrets["GOOGLE_DRIVE"])
+    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+    
+    # Crear credenciales desde el diccionario de secretos
+    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     service = build('drive', 'v3', credentials=creds)
 
-    # 2. ID de la carpeta que compartiste en Drive
+    # 2. ID de la carpeta
     FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv'
 
     # 3. Buscar el archivo más reciente en la carpeta
