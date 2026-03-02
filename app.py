@@ -64,13 +64,13 @@ st.markdown("""
     }
     .stTextInput > div > div > input {
         font-size: 1.4rem;
-        padding: 10px;
+        padding: 1px;
         border-radius: 8px;
         border: 2px solid rgba(255,255,255,0.4);
         background: rgba(255,255,255,0.15);
         color: white;
         text-align: center;
-        width: 10%;
+        width: 60%;
         max-width: 700px;
         margin: 0 auto;
         display: block;
@@ -184,6 +184,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
