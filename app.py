@@ -16,32 +16,42 @@ st.markdown("""
                     center/cover no-repeat fixed;
         min-height: 100vh;
         color: white;
+        margin: 0;
+        padding: 0;
     }
     .login-box {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: transparent;  /* ← Eliminado el fondo blanco completamente */
+        background: transparent;
         padding: 50px 60px;
         border-radius: 16px;
-        box-shadow: none;  /* ← Quitamos la sombra para que no genere "rectángulo" visual */
+        box-shadow: none;
         text-align: center;
-        max-width: 700px;
+        max-width: 800px;
         width: 90%;
+        margin: 0 auto;  /* Refuerza centrado horizontal */
     }
     .login-title {
         font-size: 2.8rem;
         font-weight: 700;
-        color: #ffffff;  /* Blanco puro para que se vea bien sobre fondo oscuro */
+        color: #ffffff;
         margin-bottom: 15px;
         line-height: 1.2;
-        text-shadow: 0 2px 8px rgba(0,0,0,0.8);  /* Sombra para legibilidad */
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
     .login-subtitle {
         font-size: 1.3rem;
         color: #e0e0e0;
         margin-bottom: 40px;
+        font-weight: 500;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    }
+    .author {
+        font-size: 1.4rem;
+        color: #bbdefb;
+        margin: 30px 0;
         font-weight: 500;
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
     }
@@ -52,6 +62,7 @@ st.markdown("""
         border: 2px solid rgba(255,255,255,0.4);
         background: rgba(255,255,255,0.15);
         color: white;
+        text-align: center;
     }
     .stButton > button {
         background: #0d47a1;
@@ -84,7 +95,7 @@ if not st.session_state.authenticated:
     st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
    
     st.markdown("""
-        <p style="font-size:1.4rem; color:#e0e0e0; margin:30px 0; font-weight:500; text-shadow: 0 1px 6px rgba(0,0,0,0.8);">
+        <p class="author">
             ELABORADO POR EL INGENIERO<br>
             <strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong>
         </p>
