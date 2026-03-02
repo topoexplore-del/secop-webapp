@@ -128,15 +128,16 @@ def cargar_datos():
     try:
         base_url = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
         
-        # Consulta limpia y en una sola línea (solo columnas útiles)
-        query = "SELECT entidad, nit_entidad, departamento_entidad, ciudad_entidad, id_del_proceso, referencia_del_proceso, nombre_del_procedimiento, descripci_n_del_procedimiento, fase, fecha_de_publicacion_del, precio_base, modalidad_de_contratacion, estado_del_procedimiento, valor_total_adjudicacion, urlproceso, estado_resumen"
+        # Consulta limpia, en una sola línea, sin saltos ni espacios extras
+        query = "SELECT entidad, departamento_entidad, ciudad_entidad, id_del_proceso, nombre_del_procedimiento, descripci_n_del_procedimiento, fecha_de_publicacion_del, valor_total_adjudicacion, urlproceso, estado_del_procedimiento"
         
-        # URL final
+        # Generar URL
         url = f"{base_url}?$query={urllib.parse.quote(query)}&$limit=999999999"
         
-        # Depuración: mostrar URL (córtala para no saturar)
-        st.info(f"Intentando cargar desde API (URL abreviada): {url[:200]}...")
+        # Depuración: mostrar la URL completa (para verificar)
+        st.info(f"URL de consulta generada: {url}")
         
+        # Cargar datos
         df = pd.read_json(url)
         
         # Limpieza
@@ -153,7 +154,7 @@ def cargar_datos():
     
     except Exception as e:
         st.error(f"Error al cargar datos desde la API: {str(e)}")
-        st.info("Posibles causas: consulta inválida, límite de tasa o problema en datos.gov.co. Prueba refrescar o reduce columnas.")
+        st.info("Posibles causas: consulta inválida o problema temporal en la API. Prueba refrescar la página.")
         return pd.DataFrame()
 
 df = cargar_datos()
