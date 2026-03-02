@@ -1,10 +1,3 @@
-import streamlit as st
-import pandas as pd
-
-# 1. Configuración de página obligatoria al inicio
-st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
-
-# 2. Estilos CSS corregidos para centrar TODO
 st.markdown("""
     <style>
     .stApp {
@@ -13,14 +6,18 @@ st.markdown("""
                     center/cover no-repeat fixed;
     }
 
-    /* Contenedor principal del login */
+    /* Caja de login sin reflejos ni sombras pesadas */
     .login-box {
         text-align: center;
         padding: 40px;
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
         border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        
+        /* SOLUCIÓN AL REFEJO: Quitamos sombras y bordes innecesarios */
+        border: none !important;
+        box-shadow: none !important;
+        
         margin-top: 50px;
     }
 
@@ -39,6 +36,8 @@ st.markdown("""
     .stTextInput div div input {
         text-align: center !important;
         border-radius: 12px !important;
+        background-color: rgba(0,0,0,0.3) !important;
+        color: white !important;
     }
 
     /* FORZAR CENTRADO DEL BOTÓN */
@@ -59,34 +58,3 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# 3. Lógica de Login con columnas para centrado matemático
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-
-if not st.session_state.authenticated:
-    # Creamos 3 columnas: la del centro (col2) es donde irá nuestro contenido
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col2:
-        st.markdown('<div class="login-box">', unsafe_allow_html=True)
-        st.markdown('<div class="login-title">BIENVENIDO AL PORTAL</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
-        st.markdown('<div class="author">ELABORADO POR EL ING. OSCAR ANDRÉS TARAZONA FIGUEROA</div>', unsafe_allow_html=True)
-
-        # El input de contraseña
-        password = st.text_input("Contraseña:", type="password", key="login_pass")
-        
-        # El botón ahora heredará el display:flex del CSS y se centrará
-        if st.button("Ingresar"):
-            if password == "tu_contraseña_2026": # Cambia esto por tu contraseña real
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Contraseña incorrecta")
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-    st.stop()
-
-# Si llega aquí, es porque está autenticado
-st.title("SECOP PRO - Dashboard")
