@@ -1,140 +1,92 @@
 import streamlit as st
+import pandas as pd
+import urllib.request
+import plotly.express as px
+import json
 
-# Configuración de página (forzar sin sidebar, sin header)
-st.set_page_config(page_title="SECOP PRO - Portal", layout="wide", initial_sidebar_state="collapsed")
+# Configuración de página (ancho completo)
+st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
 
-# Estilos completos (ocultar TODO lo innecesario de Streamlit + centrado perfecto)
+# Fondo profesional con imagen corporativa (la misma que te gustó)
 st.markdown("""
     <style>
-    /* Fondo imagen corporativa */
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68)), 
+        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
                     url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') 
-                    center/cover no-repeat fixed !important;
+                    center/cover no-repeat fixed;
         min-height: 100vh;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Ocultar COMPLETAMENTE header negro, footer, botones de deploy y espacios extras */
-    header { visibility: hidden !important; height: 0 !important; }
-    footer { visibility: hidden !important; }
-    .stDeployButton, .stSidebarCollapseButton, .css-1d391kg, .css-1v3fvcr, .css-qri22k, .css-1l269bu, .css-18e3th9, .css-1y0c8d8 {
-        display: none !important;
-    }
-    .block-container { padding-top: 0 !important; padding-bottom: 0 !important; }
-
-    /* Contenedor principal: 100% de la pantalla, centrado vertical y horizontal */
-    .main-login {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
         color: white;
-        padding: 0 20px;
-        margin: 0 !important;
     }
-
-    /* Cuadro de bienvenida transparente (sin fondo blanco grande) */
-    .welcome-card {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        padding: 60px 80px;
-        max-width: 900px;
+    .login-box {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 50px 60px;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        text-align: center;
+        max-width: 700px;
         width: 90%;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.7);
     }
-
-    .welcome-title {
-        font-size: 3.8rem;
-        font-weight: 800;
+    .login-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #0d47a1;
         margin-bottom: 15px;
-        text-shadow: 0 4px 20px rgba(0,0,0,0.9);
-        color: #ffffff;
-        line-height: 1.1;
+        line-height: 1.2;
     }
-
-    .welcome-subtitle {
-        font-size: 1.8rem;
+    .login-subtitle {
+        font-size: 1.3rem;
+        color: #424242;
+        margin-bottom: 40px;
         font-weight: 500;
-        margin-bottom: 35px;
-        color: #e3f2fd;
-        text-shadow: 0 3px 12px rgba(0,0,0,0.8);
     }
-
-    .author {
-        font-size: 1.5rem;
-        color: #bbdefb;
-        margin: 45px 0 70px 0;
-        font-weight: 500;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-    }
-
-    /* Barra contraseña pequeña, centrada */
-    .password-box {
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
-    }
-
     .stTextInput > div > div > input {
-        font-size: 1.25rem;
-        padding: 16px 24px;
-        border-radius: 14px;
-        border: 2px solid rgba(255,255,255,0.45);
-        background: rgba(255,255,255,0.18);
-        color: white;
-        text-align: center;
-        backdrop-filter: blur(10px);
+        font-size: 1.2rem;
+        padding: 14px;
+        border-radius: 10px;
+        border: 2px solid #d1d5db;
     }
-
-    .stTextInput > div > div > input::placeholder {
-        color: rgba(255,255,255,0.85);
-    }
-
-    /* Botón Ingresar centrado y moderno */
     .stButton > button {
         background: #0d47a1;
         color: white;
-        font-size: 1.35rem;
-        padding: 16px 70px;
-        border-radius: 14px;
+        font-size: 1.2rem;
+        padding: 14px 40px;
+        border-radius: 10px;
         border: none;
-        margin-top: 35px;
+        margin-top: 20px;
         width: 100%;
-        font-weight: bold;
         transition: all 0.3s;
     }
-
     .stButton > button:hover {
         background: #1565c0;
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(13,71,161,0.55);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(13,71,161,0.3);
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Estado de autenticación
+# ==================== PÁGINA DE INICIO / LOGIN ====================
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-# Página de login (todo centrado, sin rectángulo blanco, barra pequeña)
 if not st.session_state.authenticated:
-    st.markdown('<div class="main-login">', unsafe_allow_html=True)
+    # Contenedor centrado con diseño corporativo
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
     
-    st.markdown('<div class="welcome-card">', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
     
-    st.markdown('<div class="welcome-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
-    st.markdown('<div class="welcome-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="author">ELABORADO POR EL INGENIERO<br><strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong></div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="password-box">', unsafe_allow_html=True)
-    password = st.text_input("Contraseña:", type="password", key="login_pass", label_visibility="collapsed")
+    st.markdown("""
+        <p style="font-size:1.4rem; color:#424242; margin:30px 0; font-weight:500;">
+            ELABORADO POR EL INGENIERO<br>
+            <strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong>
+        </p>
+    """, unsafe_allow_html=True)
+
+    password = st.text_input("Contraseña:", type="password", key="login_pass")
     
     if st.button("Ingresar"):
         if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
@@ -144,16 +96,15 @@ if not st.session_state.authenticated:
             st.error("Contraseña incorrecta")
     
     st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
     
+    # Ocultar todo lo demás hasta autenticar
     st.stop()
 
-# Dashboard principal (solo después del login)
+# ==================== DASHBOARD PRINCIPAL (solo si autenticado) ====================
 st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
-# Cargar datos (tu código anterior)
+# Cargar datos
 @st.cache_data(ttl=3600)
 def cargar_datos():
     url_csv = "https://drive.google.com/uc?export=download&id=1lJCVBwMCJVOaipaJAHd_9jaquQ8hmQ-V"
@@ -167,7 +118,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-# Filtros en sidebar
+# Filtros
 with st.sidebar:
     st.header("Filtros")
     depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
