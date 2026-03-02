@@ -7,12 +7,12 @@ import json
 # Configuración de página (ancho completo)
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
 
-# Fondo profesional con imagen corporativa (la misma que te gustó)
+# Fondo profesional con imagen corporativa
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
-                    url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') 
+        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+                    url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')
                     center/cover no-repeat fixed;
         min-height: 100vh;
         color: white;
@@ -22,10 +22,10 @@ st.markdown("""
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.95);
+        background: transparent;  /* ← Eliminado el fondo blanco completamente */
         padding: 50px 60px;
         border-radius: 16px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        box-shadow: none;  /* ← Quitamos la sombra para que no genere "rectángulo" visual */
         text-align: center;
         max-width: 700px;
         width: 90%;
@@ -33,21 +33,25 @@ st.markdown("""
     .login-title {
         font-size: 2.8rem;
         font-weight: 700;
-        color: #0d47a1;
+        color: #ffffff;  /* Blanco puro para que se vea bien sobre fondo oscuro */
         margin-bottom: 15px;
         line-height: 1.2;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);  /* Sombra para legibilidad */
     }
     .login-subtitle {
         font-size: 1.3rem;
-        color: #424242;
+        color: #e0e0e0;
         margin-bottom: 40px;
         font-weight: 500;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
     }
     .stTextInput > div > div > input {
         font-size: 1.2rem;
         padding: 14px;
         border-radius: 10px;
-        border: 2px solid #d1d5db;
+        border: 2px solid rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.15);
+        color: white;
     }
     .stButton > button {
         background: #0d47a1;
@@ -75,28 +79,28 @@ if 'authenticated' not in st.session_state:
 if not st.session_state.authenticated:
     # Contenedor centrado con diseño corporativo
     st.markdown('<div class="login-box">', unsafe_allow_html=True)
-    
+   
     st.markdown('<div class="login-title">BIENVENIDO AL PORTAL DE BÚSQUEDA</div>', unsafe_allow_html=True)
     st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
-    
+   
     st.markdown("""
-        <p style="font-size:1.4rem; color:#424242; margin:30px 0; font-weight:500;">
+        <p style="font-size:1.4rem; color:#e0e0e0; margin:30px 0; font-weight:500; text-shadow: 0 1px 6px rgba(0,0,0,0.8);">
             ELABORADO POR EL INGENIERO<br>
             <strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong>
         </p>
     """, unsafe_allow_html=True)
 
     password = st.text_input("Contraseña:", type="password", key="login_pass")
-    
+   
     if st.button("Ingresar"):
         if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
             st.session_state.authenticated = True
             st.rerun()
         else:
             st.error("Contraseña incorrecta")
-    
+   
     st.markdown('</div>', unsafe_allow_html=True)
-    
+   
     # Ocultar todo lo demás hasta autenticar
     st.stop()
 
