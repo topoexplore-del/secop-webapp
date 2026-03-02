@@ -3,6 +3,13 @@ import pandas as pd
 import urllib.request
 import plotly.express as px
 import json
+# --- Librerías necesarias para la automatización ---
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+import io
+import os
+# ----------------------------------------------------
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -130,62 +137,114 @@ if not st.session_state.authenticated:
 st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
-# Cargar datos (cacheado)
+# ==================== LÓGICA AUTOMÁTICA DRIVE ====================
+
 @st.cache_data(ttl=3600)
 def cargar_datos():
-    url_csv = "https://drive.google.com/uc?export=download&id=1lJCVBwMCJVOaipaJAHd_9jaquQ8hmQ-V"
-    df = pd.read_csv(url_csv, low_memory=False, encoding='utf-8')
-    df = df.rename(columns=lambda x: x.strip())
-    if 'Fecha de Publicacion del Proceso' in df.columns:
-        df['Fecha de Publicacion del Proceso'] = pd.to_datetime(df['Fecha de Publicacion del Proceso'], errors='coerce')
-    if 'Valor Total Adjudicacion' in df.columns:
-        df['Valor Total Adjudicacion'] = pd.to_numeric(df['Valor Total Adjudicacion'], errors='coerce').fillna(0)
-    return df
+    # 1. LEER CREDENCIALES DESDE STREAMLIT SECRETS (TOML)
+    if "GOOGLE_DRIVE" not in st.secrets:
+        st.error("Secrets de Google Drive no configurados en TOML.")
+        return pd.DataFrame()
+        
+    creds_dict = dict(st.secrets["GOOGLE_DRIVE"])
+    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+    
+    # Usar from_service_account_info en lugar de from_service_account_file
+    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+
+   # 2. ID de la carpeta
+    FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv'
+
+    # 3. Buscar el archivo más reciente en la carpeta
+    try:
+        results = service.files().list(
+            q=f"'{FOLDER_ID}' in parents and mimeType='text/csv'",
+            spaces='drive',
+            fields='files(id, name, modifiedTime)',
+            orderBy='modifiedTime desc',
+            pageSize=1
+        ).execute()
+        
+        files = results.get('files', [])
+        
+        if not files:
+            st.error("No se encontraron archivos CSV en la carpeta de Drive.")
+            return pd.DataFrame()
+
+        file_id = files[0]['id']
+        
+        # 4. Descargar el archivo
+        request = service.files().get_media(fileId=file_id)
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        fh.seek(0)
+        
+        # 5. Leer con Pandas
+        df = pd.read_csv(fh, low_memory=False, encoding='utf-8')
+        df = df.rename(columns=lambda x: x.strip())
+        
+        # --- Limpieza de datos ---
+        if 'Fecha de Publicacion del Proceso' in df.columns:
+            df['Fecha de Publicacion del Proceso'] = pd.to_datetime(df['Fecha de Publicacion del Proceso'], errors='coerce')
+        if 'Valor Total Adjudicacion' in df.columns:
+            df['Valor Total Adjudicacion'] = pd.to_numeric(df['Valor Total Adjudicacion'], errors='coerce').fillna(0)
+        
+        return df
+
+    except Exception as e:
+        st.error(f"Error al conectar con Drive: {e}")
+        return pd.DataFrame()
+# -----------------------------------------------------------------
 
 df = cargar_datos()
 
 # Filtros en la barra lateral
 with st.sidebar:
     st.header("Filtros")
-    depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
-    ciudad = st.multiselect("Ciudad", options=sorted(df['Ciudad Entidad'].dropna().unique()))
-    palabras = st.text_input("Palabras clave (APU, Análisis, etc.)")
-    fecha_desde = st.date_input("Fecha desde", value=pd.to_datetime("2025-01-01"))
+    if not df.empty:
+        depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
+        ciudad = st.multiselect("Ciudad", options=sorted(df['Ciudad Entidad'].dropna().unique()))
+        palabras = st.text_input("Palabras clave (APU, Análisis, etc.)")
+        fecha_desde = st.date_input("Fecha desde", value=pd.to_datetime("2025-01-01"))
+    else:
+        st.warning("No hay datos para filtrar.")
 
 # Aplicar filtros
-filtered = df.copy()
-if depto:
-    filtered = filtered[filtered['Departamento Entidad'].isin(depto)]
-if ciudad:
-    filtered = filtered[filtered['Ciudad Entidad'].isin(ciudad)]
-if palabras:
-    mask = filtered['Descripción del Procedimiento'].str.contains(palabras, case=False, na=False)
-    filtered = filtered[mask]
-if fecha_desde:
-    filtered = filtered[filtered['Fecha de Publicacion del Proceso'] >= pd.to_datetime(fecha_desde)]
+if not df.empty:
+    filtered = df.copy()
+    if depto:
+        filtered = filtered[filtered['Departamento Entidad'].isin(depto)]
+    if ciudad:
+        filtered = filtered[filtered['Ciudad Entidad'].isin(ciudad)]
+    if palabras:
+        mask = filtered['Descripción del Procedimiento'].str.contains(palabras, case=False, na=False)
+        filtered = filtered[mask]
+    if fecha_desde:
+        filtered = filtered[filtered['Fecha de Publicacion del Proceso'] >= pd.to_datetime(fecha_desde)]
 
-# Mostrar Resultados
-st.subheader(f"Resultados encontrados: {len(filtered)} procesos")
+    # Mostrar Resultados
+    st.subheader(f"Resultados encontrados: {len(filtered)} procesos")
 
-st.dataframe(
-    filtered[[
-        'ID del Proceso', 'Entidad', 'Departamento Entidad', 'Ciudad Entidad',
-        'Nombre del Procedimiento', 'Descripción del Procedimiento',
-        'Fecha de Publicacion del Proceso', 'Valor Total Adjudicacion', 'URLProceso'
-    ]],
-    use_container_width=True,
-    hide_index=True
-)
+    st.dataframe(
+        filtered[[
+            'ID del Proceso', 'Entidad', 'Departamento Entidad', 'Ciudad Entidad',
+            'Nombre del Procedimiento', 'Descripción del Procedimiento',
+            'Fecha de Publicacion del Proceso', 'Valor Total Adjudicacion', 'URLProceso'
+        ]],
+        use_container_width=True,
+        hide_index=True
+    )
 
-# Descargar datos
-csv = filtered.to_csv(index=False).encode('utf-8')
-st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
-
-st.success("✅ Dashboard cargado correctamente.")
-
-
-
-
+    # Descargar datos
+    csv = filtered.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
+    st.success("✅ Dashboard cargado correctamente.")
+else:
+    st.info("Esperando datos...")
 
 
 
