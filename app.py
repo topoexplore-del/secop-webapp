@@ -1,20 +1,27 @@
 import streamlit as st
 
-# Configuración de página
+# Configuración de página (ocultar sidebar inicial, ancho completo)
 st.set_page_config(page_title="SECOP PRO - Portal", layout="wide", initial_sidebar_state="collapsed")
 
-# Estilos profesionales (fondo imagen centrada, todo centrado, barra contraseña pequeña)
+# Estilos profesionales (fondo imagen, todo centrado, sin espacios muertos)
 st.markdown("""
     <style>
+    /* Fondo imagen corporativa */
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), 
+        background: linear-gradient(rgba(0,0,0,0.68), rgba(0,0,0,0.68)), 
                     url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') 
                     center/cover no-repeat fixed !important;
         min-height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
+        margin: 0 !important;
+        padding: 0 !important;
     }
+
+    /* Ocultar header negro, footer y elementos innecesarios */
+    header, footer, .stDeployButton, .stSidebarCollapseButton, .css-1d391kg, .css-1v3fvcr, .css-qri22k, .css-1l269bu {
+        display: none !important;
+    }
+
+    /* Contenedor principal centrado vertical y horizontal */
     .main-login {
         height: 100vh;
         display: flex;
@@ -23,78 +30,86 @@ st.markdown("""
         align-items: center;
         text-align: center;
         color: white;
-        padding: 20px;
+        padding: 0 20px;
     }
+
+    /* Cuadro de bienvenida transparente y elegante (sin blanco grande) */
     .welcome-card {
-        background: rgba(255, 255, 255, 0.10);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.20);
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 20px;
-        padding: 50px 60px;
-        max-width: 800px;
+        padding: 50px 70px;
+        max-width: 850px;
         width: 90%;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        box-shadow: 0 15px 50px rgba(0,0,0,0.6);
     }
+
     .welcome-title {
-        font-size: 3.4rem;
+        font-size: 3.5rem;
         font-weight: 800;
-        margin-bottom: 12px;
-        text-shadow: 0 3px 12px rgba(0,0,0,0.7);
+        margin-bottom: 15px;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.8);
         color: #ffffff;
         line-height: 1.1;
     }
+
     .welcome-subtitle {
-        font-size: 1.6rem;
+        font-size: 1.7rem;
         font-weight: 500;
-        margin-bottom: 25px;
-        color: #e0f2ff;
+        margin-bottom: 30px;
+        color: #e3f2fd;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+
+    .author {
+        font-size: 1.45rem;
+        color: #bbdefb;
+        margin: 40px 0 60px 0;
+        font-weight: 500;
         text-shadow: 0 2px 8px rgba(0,0,0,0.6);
     }
-    .author {
-        font-size: 1.4rem;
-        color: #b3e5fc;
-        margin: 35px 0 50px 0;
-        font-weight: 500;
-        text-shadow: 0 1px 6px rgba(0,0,0,0.5);
-    }
+
+    /* Barra contraseña pequeña y centrada */
     .password-box {
         width: 100%;
-        max-width: 420px;
+        max-width: 380px;
         margin: 0 auto;
     }
+
     .stTextInput > div > div > input {
-        font-size: 1.15rem;
-        padding: 14px 18px;
+        font-size: 1.2rem;
+        padding: 14px 20px;
         border-radius: 12px;
-        border: 2px solid rgba(255,255,255,0.35);
-        background: rgba(255,255,255,0.18);
+        border: 2px solid rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.15);
         color: white;
-        backdrop-filter: blur(6px);
         text-align: center;
+        backdrop-filter: blur(8px);
     }
+
     .stTextInput > div > div > input::placeholder {
-        color: rgba(255,255,255,0.75);
+        color: rgba(255,255,255,0.8);
     }
+
+    /* Botón Ingresar centrado y elegante */
     .stButton > button {
         background: #0d47a1;
         color: white;
-        font-size: 1.25rem;
-        padding: 14px 50px;
+        font-size: 1.3rem;
+        padding: 14px 60px;
         border-radius: 12px;
         border: none;
-        margin-top: 25px;
+        margin-top: 30px;
         width: 100%;
         font-weight: bold;
         transition: all 0.3s;
     }
+
     .stButton > button:hover {
         background: #1565c0;
         transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(13,71,161,0.45);
-    }
-    /* Ocultar elementos innecesarios de Streamlit en login */
-    header, footer, .stDeployButton, .stSidebarCollapseButton, .css-1d391kg, .css-1v3fvcr {
-        display: none !important;
+        box-shadow: 0 15px 35px rgba(13,71,161,0.5);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -103,7 +118,7 @@ st.markdown("""
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
-# Página de bienvenida / login (todo centrado)
+# Página de login (todo centrado, sin rectángulo grande)
 if not st.session_state.authenticated:
     st.markdown('<div class="main-login">', unsafe_allow_html=True)
     
@@ -130,7 +145,7 @@ if not st.session_state.authenticated:
     
     st.stop()
 
-# Dashboard principal (solo después de login)
+# Dashboard principal (solo después del login)
 st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
@@ -148,7 +163,7 @@ def cargar_datos():
 
 df = cargar_datos()
 
-# Filtros en sidebar (ahora visible)
+# Filtros
 with st.sidebar:
     st.header("Filtros")
     depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
@@ -183,3 +198,4 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
