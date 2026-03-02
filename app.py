@@ -1,15 +1,8 @@
 import streamlit as st
 import pandas as pd
-import urllib.request
+import urllib.parse
 import plotly.express as px
 import json
-# --- Librerías necesarias para la automatización ---
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
-import io
-import os
-# ----------------------------------------------------
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -27,7 +20,7 @@ st.markdown("""
         padding: 0;
     }
     .login-box {
-        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -39,20 +32,20 @@ st.markdown("""
         max-width: 800px;
         width: 90%;
         margin: 0 auto;
-      }
+    }
     .login-title {
         font-size: 2.8rem;
         font-weight: 700;
         color: #ffffff;
         margin-bottom: 1px;
-        line-height: 0.5;
+        line-height: 1.2;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        text-align: center;  /* Reforzado centrado */
+        text-align: center;
     }
     .login-subtitle {
         font-size: 2.8rem;
         color: #ffffff;
-        margin-bottom: 0px;
+        margin-bottom: 15px;
         font-weight: 700;
         text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         text-align: center;
@@ -65,7 +58,6 @@ st.markdown("""
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
         text-align: center;
     }
-    /* Forzar centrado de la etiqueta y el input */
     .stTextInput label {
         display: block !important;
         text-align: center !important;
@@ -73,7 +65,6 @@ st.markdown("""
         color: white !important;
         margin-bottom: 5px !important;
     }
-    
     .stTextInput div div input {
         text-align: center !important;
         background-color: rgba(0,0,0,0.3) !important;
@@ -81,15 +72,12 @@ st.markdown("""
         border-radius: 12px !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
     }
-
-    /* FORZAR CENTRADO DEL BOTÓN */
     .stButton {
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
         margin-top: 15px !important;
     }
-
     .stButton button {
         background: linear-gradient(90deg, #1e40af, #3b82f6) !important;
         color: white !important;
@@ -111,7 +99,6 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Usamos columnas para asegurar el centrado matemático
     _, col_central, _ = st.columns([1, 2, 1])
     
     with col_central:
@@ -119,7 +106,7 @@ if not st.session_state.authenticated:
         st.markdown('<div class="login-title">BIENVENIDO AL PORTAL</div>', unsafe_allow_html=True)
         st.markdown('<div class="login-subtitle">DE PROCESOS DE CONTRATACIÓN</div>', unsafe_allow_html=True)
         st.markdown('<div class="author">ELABORADO POR EL INGENIERO<br><strong>OSCAR ANDRÉS TARAZONA FIGUEROA</strong></div>', unsafe_allow_html=True)
-
+        
         password = st.text_input("Contraseña:", type="password", key="login_pass")
         
         if st.button("Ingresar"):
@@ -131,121 +118,146 @@ if not st.session_state.authenticated:
         
         st.markdown('</div>', unsafe_allow_html=True)
     
-    st.stop() # Detiene la ejecución hasta que se autentique
+    st.stop()
 
 # ==================== DASHBOARD PRINCIPAL ====================
 st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
 st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
-# ==================== LÓGICA AUTOMÁTICA DRIVE ====================
-
-@st.cache_data(ttl=3600)
+# ==================== CARGAR DATOS DESDE API (SIN LÍMITE DE FILAS) ====================
+@st.cache_data(ttl=3600)  # Cache por 1 hora
 def cargar_datos():
-    # 1. LEER CREDENCIALES DESDE STREAMLIT SECRETS (TOML)
-    if "GOOGLE_DRIVE" not in st.secrets:
-        st.error("Secrets de Google Drive no configurados en TOML.")
-        return pd.DataFrame()
-        
-    creds_dict = dict(st.secrets["GOOGLE_DRIVE"])
-    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-    
-    # Usar from_service_account_info en lugar de from_service_account_file
-    creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
-    service = build('drive', 'v3', credentials=creds)
-
-   # 2. ID de la carpeta
-    FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv'
-
-    # 3. Buscar el archivo más reciente en la carpeta
     try:
-        results = service.files().list(
-            q=f"'{FOLDER_ID}' in parents and mimeType='text/csv'",
-            spaces='drive',
-            fields='files(id, name, modifiedTime)',
-            orderBy='modifiedTime desc',
-            pageSize=1
-        ).execute()
+        # URL base de la API
+        base_url = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
         
-        files = results.get('files', [])
+        # Consulta completa (la que me compartiste)
+        query = """
+        SELECT
+          `entidad`,
+          `nit_entidad`,
+          `departamento_entidad`,
+          `ciudad_entidad`,
+          `ordenentidad`,
+          `codigo_pci`,
+          `id_del_proceso`,
+          `referencia_del_proceso`,
+          `ppi`,
+          `id_del_portafolio`,
+          `nombre_del_procedimiento`,
+          `descripci_n_del_procedimiento`,
+          `fase`,
+          `fecha_de_publicacion_del`,
+          `fecha_de_ultima_publicaci`,
+          `fecha_de_publicacion_fase`,
+          `fecha_de_publicacion_fase_1`,
+          `fecha_de_publicacion`,
+          `fecha_de_publicacion_fase_2`,
+          `fecha_de_publicacion_fase_3`,
+          `precio_base`,
+          `modalidad_de_contratacion`,
+          `justificaci_n_modalidad_de`,
+          `duracion`,
+          `unidad_de_duracion`,
+          `fecha_de_recepcion_de`,
+          `fecha_de_apertura_de_respuesta`,
+          `fecha_de_apertura_efectiva`,
+          `ciudad_de_la_unidad_de`,
+          `nombre_de_la_unidad_de`,
+          `proveedores_invitados`,
+          `proveedores_con_invitacion`,
+          `visualizaciones_del`,
+          `proveedores_que_manifestaron`,
+          `respuestas_al_procedimiento`,
+          `respuestas_externas`,
+          `conteo_de_respuestas_a_ofertas`,
+          `proveedores_unicos_con`,
+          `numero_de_lotes`,
+          `estado_del_procedimiento`,
+          `id_estado_del_procedimiento`,
+          `adjudicado`,
+          `id_adjudicacion`,
+          `codigoproveedor`,
+          `departamento_proveedor`,
+          `ciudad_proveedor`,
+          `fecha_adjudicacion`,
+          `valor_total_adjudicacion`,
+          `nombre_del_adjudicador`,
+          `nombre_del_proveedor`,
+          `nit_del_proveedor_adjudicado`,
+          `codigo_principal_de_categoria`,
+          `estado_de_apertura_del_proceso`,
+          `tipo_de_contrato`,
+          `subtipo_de_contrato`,
+          `categorias_adicionales`,
+          `urlproceso`,
+          `codigo_entidad`,
+          `estado_resumen`
+        """
         
-        if not files:
-            st.error("No se encontraron archivos CSV en la carpeta de Drive.")
-            return pd.DataFrame()
-
-        file_id = files[0]['id']
+        # URL final con $limit muy alto para traer TODO el dataset
+        url = f"{base_url}?$query={urllib.parse.quote(query)}&$limit=999999999"
         
-        # 4. Descargar el archivo
-        request = service.files().get_media(fileId=file_id)
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        fh.seek(0)
+        # Cargar datos
+        df = pd.read_json(url)
         
-        # 5. Leer con Pandas
-        df = pd.read_csv(fh, low_memory=False, encoding='utf-8')
+        # Limpieza básica
         df = df.rename(columns=lambda x: x.strip())
         
-        # --- Limpieza de datos ---
-        if 'Fecha de Publicacion del Proceso' in df.columns:
-            df['Fecha de Publicacion del Proceso'] = pd.to_datetime(df['Fecha de Publicacion del Proceso'], errors='coerce')
-        if 'Valor Total Adjudicacion' in df.columns:
-            df['Valor Total Adjudicacion'] = pd.to_numeric(df['Valor Total Adjudicacion'], errors='coerce').fillna(0)
+        # Convertir fechas y valores numéricos
+        if 'fecha_de_publicacion_del' in df.columns:
+            df['fecha_de_publicacion_del'] = pd.to_datetime(df['fecha_de_publicacion_del'], errors='coerce')
+        if 'valor_total_adjudicacion' in df.columns:
+            df['valor_total_adjudicacion'] = pd.to_numeric(df['valor_total_adjudicacion'], errors='coerce').fillna(0)
         
+        st.success(f"Datos cargados desde API: {len(df)} filas encontradas.")
         return df
-
+    
     except Exception as e:
-        st.error(f"Error al conectar con Drive: {e}")
+        st.error(f"Error al cargar datos desde la API: {str(e)}")
         return pd.DataFrame()
-# -----------------------------------------------------------------
 
 df = cargar_datos()
 
-# Filtros en la barra lateral
+# ==================== FILTROS ====================
 with st.sidebar:
     st.header("Filtros")
     if not df.empty:
-        depto = st.multiselect("Departamento", options=sorted(df['Departamento Entidad'].dropna().unique()))
-        ciudad = st.multiselect("Ciudad", options=sorted(df['Ciudad Entidad'].dropna().unique()))
+        depto = st.multiselect("Departamento", options=sorted(df['departamento_entidad'].dropna().unique()))
+        ciudad = st.multiselect("Ciudad", options=sorted(df['ciudad_entidad'].dropna().unique()))
         palabras = st.text_input("Palabras clave (APU, Análisis, etc.)")
         fecha_desde = st.date_input("Fecha desde", value=pd.to_datetime("2025-01-01"))
     else:
-        st.warning("No hay datos para filtrar.")
+        st.warning("No hay datos disponibles para filtrar.")
 
-# Aplicar filtros
+# ==================== APLICAR FILTROS ====================
 if not df.empty:
     filtered = df.copy()
     if depto:
-        filtered = filtered[filtered['Departamento Entidad'].isin(depto)]
+        filtered = filtered[filtered['departamento_entidad'].isin(depto)]
     if ciudad:
-        filtered = filtered[filtered['Ciudad Entidad'].isin(ciudad)]
+        filtered = filtered[filtered['ciudad_entidad'].isin(ciudad)]
     if palabras:
-        mask = filtered['Descripción del Procedimiento'].str.contains(palabras, case=False, na=False)
+        mask = filtered['descripci_n_del_procedimiento'].str.contains(palabras, case=False, na=False)
         filtered = filtered[mask]
     if fecha_desde:
-        filtered = filtered[filtered['Fecha de Publicacion del Proceso'] >= pd.to_datetime(fecha_desde)]
+        filtered = filtered[filtered['fecha_de_publicacion_del'] >= pd.to_datetime(fecha_desde)]
 
-    # Mostrar Resultados
     st.subheader(f"Resultados encontrados: {len(filtered)} procesos")
 
     st.dataframe(
         filtered[[
-            'ID del Proceso', 'Entidad', 'Departamento Entidad', 'Ciudad Entidad',
-            'Nombre del Procedimiento', 'Descripción del Procedimiento',
-            'Fecha de Publicacion del Proceso', 'Valor Total Adjudicacion', 'URLProceso'
+            'id_del_proceso', 'entidad', 'departamento_entidad', 'ciudad_entidad',
+            'nombre_del_procedimiento', 'descripci_n_del_procedimiento',
+            'fecha_de_publicacion_del', 'valor_total_adjudicacion', 'urlproceso'
         ]],
         use_container_width=True,
         hide_index=True
     )
 
-    # Descargar datos
     csv = filtered.to_csv(index=False).encode('utf-8')
     st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
-    st.success("✅ Dashboard cargado correctamente.")
+
+    st.success("✅ Dashboard cargado correctamente desde la API.")
 else:
-    st.info("Esperando datos...")
-
-
-
-
+    st.info("Esperando datos de la API...")
