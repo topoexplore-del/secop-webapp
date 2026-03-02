@@ -16,7 +16,12 @@ if password != st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
 # ==================== CARGAR DATOS ====================
 @st.cache_data
 def cargar_datos():
-    df = pd.read_csv(r"D:\SECOP_Automation\SECOP_II_-_Procesos_de_Contratación_20260228.csv", low_memory=False)
+    import pandas as pd
+import urllib.request
+
+# URL de descarga directa desde Google Drive
+url_csv = "https://drive.google.com/uc?export=download&id=1lJCVBwMCJVOaipaJAHd_9jaquQ8hmQ-V"
+df = pd.read_csv(url_csv, low_memory=False)
     df = df.rename(columns=lambda x: x.strip())
     if 'Fecha de Publicacion del Proceso' in df.columns:
         df['Fecha de Publicacion del Proceso'] = pd.to_datetime(df['Fecha de Publicacion del Proceso'], errors='coerce')
@@ -53,5 +58,6 @@ st.dataframe(filtered[['ID del Proceso', 'Entidad', 'Departamento Entidad', 'Ciu
 # Botón de descarga
 csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
+
 
 st.success("✅ Sistema funcionando correctamente. Los archivos se organizan automáticamente por Departamento → Ciudad → Proceso")
