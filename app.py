@@ -62,18 +62,20 @@ st.markdown("""
         text-shadow: 0 1px 6px rgba(0,0,0,0.7);
         text-align: center;
     }
-    .stTextInput > div > div > input {
-        font-size: 1.4rem;
-        padding: 1px;
-        border-radius: 8px;
+  .stTextInput > div > div > input {
+        font-size: 1.8rem;
+        padding: 14px;
+        border-radius: 10px;
         border: 2px solid rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.15);
         color: white;
         text-align: center;
-        width: 60%;
+        width: 100%;
         max-width: 700px;
         margin: 0 auto;
         display: block;
     }
+
     .stButton > button {
         background: #0d47a1;
         color: white;
@@ -183,6 +185,7 @@ csv = filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Descargar resultados como CSV", csv, "secop_resultados.csv", "text/csv")
 
 st.success("✅ Dashboard cargado correctamente.")
+
 
 
 
