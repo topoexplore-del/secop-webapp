@@ -1,10 +1,15 @@
 import streamlit as st
 import pandas as pd
+import urllib.request
+import plotly.express as px
+import json
+# --- Nuevas librerías necesarias para la automatización ---
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import io
 import os
+# ---------------------------------------------------------
 
 # ==================== CONFIGURACIÓN DE PÁGINA ====================
 st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", initial_sidebar_state="collapsed")
@@ -13,37 +18,53 @@ st.set_page_config(page_title="SECOP PRO - Portal de Búsqueda", layout="wide", 
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
+        background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
                     url('https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')
                     center/cover no-repeat fixed;
+        min-height: 100vh;
         color: white;
+        margin: 0;
+        padding: 0;
     }
-
-    /* Caja de login tipo 'tarjeta flotante' profesional */
     .login-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: auto;
-        padding: 50px;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 24px;
-        
-        /* ELIMINAR REFLEJOS Y BORDES */
-        border: none !important;
-        box-shadow: none !important;
-        
+        position: fixed;  /* Cambiado a fixed para que ignore scroll y ocupe centro real */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        padding: 40px 60px;
+        border-radius: 16px;
+        box-shadow: none;
         text-align: center;
-        max-width: 650px;
-        margin-top: 10vh;
+        max-width: 800px;
+        width: 90%;
+        margin: 0 auto;
+      }
+    .login-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1px;
+        line-height: 0.5;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;  /* Reforzado centrado */
     }
-
-    .login-title { font-size: 2.2rem; font-weight: 800; color: white; margin-bottom: 5px; }
-    .login-subtitle { font-size: 1.1rem; color: #3b82f6; font-weight: 600; text-transform: uppercase; margin-bottom: 20px; }
-    .author { font-size: 0.95rem; color: rgba(255,255,255,0.7); margin-bottom: 30px; line-height: 1.5; }
-
+    .login-subtitle {
+        font-size: 2.8rem;
+        color: #ffffff;
+        margin-bottom: 0px;
+        font-weight: 700;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        text-align: center;
+    }
+    .author {
+        font-size: 1.3rem;
+        color: #bbdefb;
+        margin: 30px 0;
+        font-weight: 400;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        text-align: center;
+    }
     /* Forzar centrado de la etiqueta y el input */
     .stTextInput label {
         display: block !important;
@@ -102,7 +123,6 @@ if not st.session_state.authenticated:
         password = st.text_input("Contraseña:", type="password", key="login_pass")
         
         if st.button("Ingresar"):
-            # IMPORTANTE: Configura PASSWORD en Streamlit Secrets
             if password == st.secrets.get("PASSWORD", "tu_contraseña_segura_2026"):
                 st.session_state.authenticated = True
                 st.rerun()
@@ -111,11 +131,16 @@ if not st.session_state.authenticated:
         
         st.markdown('</div>', unsafe_allow_html=True)
     
-    st.stop() 
+    st.stop() # Detiene la ejecución hasta que se autentique
+
+# ==================== DASHBOARD PRINCIPAL ====================
+st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
+st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
 
 # ==================== LÓGICA AUTOMÁTICA DRIVE ====================
+
 @st.cache_data(ttl=3600)
-def cargar_datos_automatico():
+def cargar_datos():
     # 1. Configurar credenciales desde el archivo JSON en GitHub
     KEY_PATH = "credentials.json"
     SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
@@ -128,7 +153,7 @@ def cargar_datos_automatico():
     service = build('drive', 'v3', credentials=creds)
 
     # 2. ID de la carpeta que compartiste en Drive
-    FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv' # <--- ID CONFIGURADO
+    FOLDER_ID = '1cpzTb_oqrK8OYJMbsSrsqcNOXbd2GfXv'
 
     # 3. Buscar el archivo más reciente en la carpeta
     try:
@@ -172,13 +197,9 @@ def cargar_datos_automatico():
     except Exception as e:
         st.error(f"Error al conectar con Drive: {e}")
         return pd.DataFrame()
+# -----------------------------------------------------------------
 
-# ==================== DASHBOARD PRINCIPAL ====================
-st.title("SECOP PRO - Dashboard de Licitaciones en Colombia")
-st.markdown("Sistema privado con organización automática por Departamento → Ciudad → Proceso")
-
-# Cargar datos
-df = cargar_datos_automatico()
+df = cargar_datos()
 
 # Filtros en la barra lateral
 with st.sidebar:
